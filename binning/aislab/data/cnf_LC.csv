@@ -1,0 +1,30 @@
+"cnames","xtp","vtp","order"
+"loan_amnt","num",,
+"funded_amnt","num",,
+"funded_amnt_inv","num",,
+"term","ord",," 36 months$ 60 months"
+"int_rate","num",,
+"installment","num",,
+"grade","ord",,"G$F$E$D$C$B$A"
+"sub_grade","ord",,"G5$G4$G3$G2$G1$F5$F4$F3$F2$F1$E5$E4$E3$E2$E1$D5$D4$D3$D2$D1$C5$C4$C3$C2$C1$B5$B4$B3$B2$B1$A5$A4$A3$A2$A1"
+"emp_title","nom",,
+"emp_length","ord",,"< 1 year$1 year$2 years$3 years$4 years$5 years$6 years$7 years$8 years$9 years$10 years$10+ years"
+"home_ownership","ord",,"ANY$MORTGAGE$NONE$OTHER$OWN$RENT"
+"annual_inc","num",,
+"verification_status","ord",,"Not Verified$Verified$Source Verified"
+"issue_d","nom",,
+"title","nom",,
+"zip_code","nom",,
+"addr_state","nom",,
+"dti","num",,
+"earliest_cr_line","nom",,
+"fico_range_low","num",,
+"fico_range_high","num",,
+"open_acc","num",,
+"pub_rec","num",,
+"revol_bal","num",,
+"revol_util","num",,
+"total_acc","num",,
+"initial_list_status","ord",,"f$w"
+"mort_acc","num",,
+"pub_rec_bankruptcies","num",,
