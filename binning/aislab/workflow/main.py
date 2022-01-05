@@ -9,9 +9,9 @@ import pandas as pd
 # cpath = '/home/user/.../cnf_LC.csv'
 
 wpath = 'C:/users/alexs/appdata/local/programs/python/python39/lib/site-packages'
-dpathx = 'C:/University/Дипломна работа/CODE/decision-tree-algorithm/binning2/binning-20211104T183858Z-001/binning/aislab/data/x_samples_250000.csv'
-dpathy = 'C:/University/Дипломна работа/CODE/decision-tree-algorithm/binning2/binning-20211104T183858Z-001/binning/aislab/data/y_samples_250000.csv'
-cpath = 'C:/University/Дипломна работа/CODE/decision-tree-algorithm/binning2/binning-20211104T183858Z-001/binning/aislab/data/cnf_LC.csv'
+dpathx = 'C:/University/Дипломна работа/CODE/decision-tree-algorithm/binning/aislab/data/x_samples_250000.csv'
+dpathy = 'C:/University/Дипломна работа/CODE/decision-tree-algorithm/binning/aislab/data/y_samples_250000.csv'
+cpath = 'C:/University/Дипломна работа/CODE/decision-tree-algorithm/binning/aislab/data/cnf_LC.csv'
 
 np.set_printoptions(precision = 15, linewidth = 1e5, threshold = 1e10)
 pd.options.display.precision = 15

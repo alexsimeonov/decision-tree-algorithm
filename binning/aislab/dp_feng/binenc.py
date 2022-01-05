@@ -36,7 +36,7 @@ def best_merge(bns, s):
     for si in s:
         i2 += si
         if i2 - i1 > 1:
-            for i3 in range(i1, i2-1): 
+            for i3 in range(i1, i2-1):
                 bns2 = mrgbns(bns2, i1)
         j += 1
         i1 = i2
@@ -381,7 +381,7 @@ def mrgbns(bns, i, j=np.nan):
     else: print('ERROR: Unknown type of x in mrgbns()...') # todo: make this error
     bns[i]['nw'] = bns[i]['nw'] + bns[j]['nw']
     bns[i]['n'] = bns[i]['n'] + bns[j]['n']
-    if 'y' in bns[i].keys(): 
+    if 'y' in bns[i].keys():
         for h in range(len(bns[i]['y'])): bns[i]['y'][h+1] = sumls(bns[i]['y'][h+1], bns[j]['y'][h+1])
         for h in range(len(bns[i]['y2'])): bns[i]['y2'][h+1] = sumls(bns[i]['y2'][h+1], bns[j]['y2'][h+1])
     cnd_i = bns[i]['type'] == 'Other' or bns[i]['type'] == 'Missing' or bns[i]['type'] == 'Special Value'
@@ -452,7 +452,7 @@ def permints(n, m, init=True):
 ###################################################################################
 def reduce_bns1(bns, xtp, g, b, nw, gd, bd):
     order_nom = lambda g, nw: g / max(1, nw)
-    cnd_mrg = lambda g, b, nw, gd, bd, p1: g < gd and g*p1 < 1 or b < bd and b*p1 < 1 # merge condition 
+    cnd_mrg = lambda g, b, nw, gd, bd, p1: g < gd and g*p1 < 1 or b < bd and b*p1 < 1 # merge condition
     bng = copy.deepcopy(bns)
     if xtp == 'nom':
         bns = sort_bins(config, bns, order_nom, BUS_groups)
@@ -578,7 +578,7 @@ def setbin(x, w, xtp, btp, y=np.empty((0,0)), ytp='', yi=[]):
         if np.any(np.isnan(x)):
             bn['lb'] = [np.nan]
             bn['rb'] = [np.nan]
-        else: 
+        else:
             if (isinstance(x, np.ndarray) or isinstance(x, list)) and len(x) == 0:
                 bn['lb'] = []
                 bn['rb'] = []
@@ -677,7 +677,7 @@ def sort_bins(vname, config, unordered_bins, bin_order_function):
         elif bn[-1]['type'] == 'missing' and unordered_bins[-1][-1]['statistics']['number_of_records'] >= config['parameters']['fc_mir']:
             pass
         else:
-            # Do not use the missings not statistically significant number of NaNs 
+            # Do not use the missings not statistically significant number of NaNs
             if 'Use_NA' in config['variables'][vname]:
                 config['variables'][vname].pop('Use_NA')
 
@@ -693,7 +693,7 @@ def sort_bins(vname, config, unordered_bins, bin_order_function):
 def spih(bns, xtp, md, nd, met):
     Nw = 0
     for k in bns:
-        Nw = Nw + bns[k]['nw'] 
+        Nw = Nw + bns[k]['nw']
     m = len(bns)
     Nd = Nw/md
     i = 0
@@ -732,10 +732,10 @@ def spih(bns, xtp, md, nd, met):
         m = len(bns)
         if met == 'enr' and iold < i:
             sm = 0
-            for k in range(1,i+1): sm = sm + bns[k]['nw'] 
+            for k in range(1,i+1): sm = sm + bns[k]['nw']
             iold = i
             if md == i and m <= md: break
-    
+
     while m > md:
         if xtp == 'num' or xtp == 'ord':
             ni2 = []
@@ -857,7 +857,7 @@ def spih_sb_co1y(bns, xtp, ytp, md, gd, bd, mar, pt, ba, dGBInd, tolmindGBInd, m
         _, ind = min1(pvalc_b, naskip=True)
         crit_b = crit_b[ind]
         bns_b = bns_b[ind]
-    else: 
+    else:
         bns_b = None
         crit_b = np.nan
 #    print('sb: ', round((time.time() - loop_time), 3), 'sec')
@@ -869,7 +869,7 @@ def spih_sb_hclust(bns, xtp, md, met_dist):
     [x, w] = mdep(syy, nw, wy)
     [D, ind] = dist1(x, w, met_dist, xtp)
     ind1 = num2lst(np.arange(m))
-    
+
     interate = md < m
     x1 = x
     while interate:
@@ -946,7 +946,7 @@ def stbng(met, bns, xtp, ytp, x=np.empty((0,0)), y=np.empty((0,0)), w=np.empty((
 
         Sy = sy.sum(axis=0)
         s = {}
-        if ytpi == 'bin': 
+        if ytpi == 'bin':
             s['sy'] = sy
             syb = np.array(nw - sy)
             s['syb'] = syb
@@ -967,7 +967,7 @@ def stbng(met, bns, xtp, ytp, x=np.empty((0,0)), y=np.empty((0,0)), w=np.empty((
             s['Gini'] = gini(sy, syb)
             #s['WoE'] = woe(sy, syb)
             s['KS'] = ks(sy, syb)
-            s['Vin'] = vinf(sy, syb) 
+            s['Vin'] = vinf(sy, syb)
             s['D'] = dind(sy, syb)
             if m == 2: s['twoing'] = twng(sy, syb)
             s['Chi2'] = chi2(sy, syb)
@@ -978,7 +978,7 @@ def stbng(met, bns, xtp, ytp, x=np.empty((0,0)), y=np.empty((0,0)), w=np.empty((
         else:
             s = []
         st[i] = s
-        # for i in range(m): 
+        # for i in range(m):
         #     if 'WoE' in s:  bns[i+1]['woe'] = s['WoE'][i]
         #     else:           bns[i+1]['woe'] = None
         #     if 'my' in s:   bns[i+1]['my'] = s['my1'][i]
