@@ -6,14 +6,15 @@ Created on Fri Dec 17 00:23:35 2021
 """
 
 from node import Node
+from enum import Enum
 
-# Currently having problems with following lines - ask for some help -> why it says that gnrl is missing
-#from binning.aislab.dp_feng.binenc import *
-#from binning.aislab.gnrl import *
-
+class Criterion(Enum):
+    GINI = "gini"
+    ENTROPY = "entropy"
+    
 # Accepting hyperparametes input from user ->
 # only the ones with values would be taken under consideration
-criterion = input("Enter the name of function to measure split quality: ") #should be limited to gini or entropy, maybe default should be gini
+criterion = input("Enter the name of function to measure split quality(Could be 'gini' or 'entropy'): ") #should be limited to gini or entropy, maybe default should be gini
 max_depth = input("Enter desired max depth of decision tree: ")
 min_samples_split = input("Enter minimum samples in a node after split: ")
 min_samples_leaf = input("Enter minimum samples in a leaf node: ")
@@ -24,8 +25,11 @@ min_samples_leaf = input("Enter minimum samples in a leaf node: ")
 
 hyperparams = {}
 
+# Used to check if user input for criterion is valid Criterion
+values = set(item.value for item in Criterion)
+
 if criterion:
-    hyperparams["criterion"] = criterion
+    hyperparams["criterion"] = Criterion(criterion) if (criterion in values) else Criterion.GINI
 if max_depth:
     hyperparams["max_depth"] = max_depth
 if min_samples_split:
