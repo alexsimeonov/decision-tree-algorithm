@@ -46,7 +46,7 @@ if min_samples_leaf:
 if max_children_count:
     hyperparams["max_children_count"] = max_children_count
     
-dataset = pd.read_csv(csv_file) # Will contain the initial dataset
+initial_dataset = pd.read_csv(csv_file)
     
 # Creating the root node from data provided along with user input.
-root_node = Node(hyperparams, dataset)
+root_node = Node(hyperparams, initial_dataset)
