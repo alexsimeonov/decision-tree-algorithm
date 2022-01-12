@@ -6,10 +6,15 @@ Created on Tue Dec  7 23:38:36 2021
 """
 from enum import Enum
 import uuid
+import sys
+import os
 
-#from aislab.dp_feng.binenc import *
-#from aislab.gnrl import *
-from binning.aislab import *
+wpath = 'C:/users/alexs/appdata/local/programs/python/python39/lib/site-packages'
+sys.path.append(wpath)
+os.chdir(wpath)
+
+from aislab.dp_feng.binenc import *
+from aislab.gnrl import *
 
 class Status(Enum):
     DECISION = 0
@@ -27,8 +32,9 @@ class Node:
     
     def grow(self, growing_method):
         print("growing")
+        ub = sbng()
             # When fix the import use the ubng method in here
-        
+            # Always apply ubng and sbng
             # Recursively executed the actions function described below
             # Call the external function (split_method) from main.py 
             # with self.data_set use the result in order to create a new Node instances

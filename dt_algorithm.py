@@ -17,6 +17,7 @@ class Criterion(Enum):
     
 # Accepting hyperparametes input from user ->
 # only the ones with values would be taken under consideration
+# Remove criterion input
 criterion = input("Enter the name of function to measure split quality(Could be 'gini' or 'entropy'): ") #should be limited to gini or entropy, maybe default should be gini
 max_depth = input("Enter desired max depth of decision tree: ")
 min_samples_split = input("Enter minimum samples in a node after split: ")
