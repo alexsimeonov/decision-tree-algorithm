@@ -8,6 +8,7 @@ Created on Tue Dec  7 23:38:36 2021
 from enum import Enum
 from aislab.dp_feng.binenc import *
 from aislab.gnrl import *
+import pandas as pd
 
 class Status(Enum):
     ROOT = 0
@@ -61,8 +62,12 @@ class Node:
         tic()
         sb = sbng(ub)       # supervised binning
         toc('SBNG')
-        print(sb)
-        # Always apply ubng and sbng
+        # print(sb)
+
+        df = pd.DataFrame(sb)
+        print(df)
+        df.to_json('sb_result')
+        print('Finished successfully!')
 
     def prune():
         print("pruning")

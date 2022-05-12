@@ -13,10 +13,10 @@ from enum import Enum
 
 wpath = '/Users/alexandersimeonov/Library/Python/2.7/lib/python/site-packages'
 # path to dataset
-x_path = '/Users/alexandersimeonov/Documents/Development/University/decision-tree-algorithm/binning/aislab/data/x_samples_250000.csv'
+x_path = '/Users/alexandersimeonov/Documents/Development/University/decision-tree-algorithm/data/x_samples_250000.csv'
 # path to output values
-y_path = '/Users/alexandersimeonov/Documents/Development/University/decision-tree-algorithm/binning/aislab/data/y_samples_250000.csv'
-c_path = '/Users/alexandersimeonov/Documents/Development/University/decision-tree-algorithm/binning/aislab/data/cnf_LC.csv'
+y_path = '/Users/alexandersimeonov/Documents/Development/University/decision-tree-algorithm/data/y_samples_250000.csv'
+c_path = '/Users/alexandersimeonov/Documents/Development/University/decision-tree-algorithm/data/cnf_LC.csv'
 
 sys.path.append(wpath)
 os.chdir(wpath)
