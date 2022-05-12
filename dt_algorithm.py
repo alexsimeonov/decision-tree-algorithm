@@ -21,8 +21,6 @@ c_path = '/Users/alexandersimeonov/Documents/Development/University/decision-tre
 sys.path.append(wpath)
 os.chdir(wpath)
 
-# csv_file = '/Users/alexandersimeonov/Documents/Development/University/decision-tree-algorithm/binning/aislab/data/cnf_LC.csv'
-
 class Criterion(Enum):
     GINI = "gini"
     ENTROPY = "entropy"
@@ -35,8 +33,6 @@ max_children_count = input("Enter maximum number of children per node: ")
 
 hyperparams = {}
 
-# DT class
-
 if max_depth:
     hyperparams["max_depth"] = max_depth
 if min_samples_split:
@@ -45,13 +41,6 @@ if min_samples_leaf:
     hyperparams["min_samples_leaf"] = min_samples_leaf
 if max_children_count:
     hyperparams["max_children_count"] = max_children_count
-
-# initial_dataset = pd.read_csv(csv_file)
-
-# Creating the root node from data provided along with user input.
-# Load config, x and y
-# x and y should be passed from the genarator if such i used, if not - use hardcoded from ready dataset
-# root_node = Node(hyperparams, initial_dataset)
 
 decision_tree = DecisionTree(x_path, y_path, c_path, hyperparams,)
 decision_tree.grow()

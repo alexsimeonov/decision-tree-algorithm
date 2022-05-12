@@ -5,20 +5,6 @@ Created on Tue Dec  7 23:38:36 2021
 @author: alexs
 """
 
-# import os
-# import sys
-# import uuid
-
-# wpath = '/Users/alexandersimeonov/Library/Python/2.7/lib/python/site-packages'
-# # path to dataset
-# x_path = '/Users/alexandersimeonov/Documents/Development/University/decision-tree-algorithm/binning/aislab/data/x_samples_250000.csv'
-# # path to output values
-# y_path = '/Users/alexandersimeonov/Documents/Development/University/decision-tree-algorithm/binning/aislab/data/y_samples_250000.csv'
-# c_path = '/Users/alexandersimeonov/Documents/Development/University/decision-tree-algorithm/binning/aislab/data/cnf_LC.csv'
-
-# sys.path.append(wpath)
-# os.chdir(wpath)
-
 from enum import Enum
 from aislab.dp_feng.binenc import *
 from aislab.gnrl import *
@@ -73,18 +59,10 @@ class Node:
         ub = ubng(xe, xtp, w, y=y, ytp=ytp, cnames=cname)     # unsupervised binning
         toc('UBNG')
         tic()
-        sb = sbng(ub)
-        # new Node(x = sb[0].x) pseudo          # supervised binning
-        # toc('SBNG')
-
-
-            # When fix the import use the ubng method in here
-            # Always apply ubng and sbng
-            # Recursively executed the actions function described below
-            # Call the external function (split_method) from main.py
-            # with self.data_set use the result in order to create a new Node instances
-            # for left and right properties and call their split methods
-            # This should continue until one of the predefined conditions is reached
+        sb = sbng(ub)       # supervised binning
+        toc('SBNG')
+        print(sb)
+        # Always apply ubng and sbng
 
     def prune():
         print("pruning")
