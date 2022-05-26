@@ -22,28 +22,24 @@ class Node:
         self.parent = parent # If present
         self.children = None # Add children after split
         self.status = Status.TERMINAL
-        self.x_path = x
-        self.y_path = y
-        self.config_path = config
+        self.x = x
+        self.y = y
+        self.config = config
 
     def split(self):
         print("Node starts splitting.")
 
-        x = pd.read_csv(self.x_path)
-        y = pd.read_csv(self.y_path)
-        cnf = pd.read_csv(self.config_path)
+        N = 1000 # x.shape[0]
 
-        N = 1000 # x.shape[0] #
-
-        x = x.iloc[:N, :]
-        y = y.iloc[:N, :].values
+        x = self.x.iloc[:N, :]
+        y = self.y.iloc[:N, :].values
 
         tic2() # Overall time
 
-        cname = cnf['cnames'].tolist()
-        xtp = cnf['xtp'].values
-        vtp = cnf['xtp'].values
-        order = cnf['order']
+        cname = self.config['cnames'].tolist()
+        xtp = self.config['xtp'].values
+        vtp = self.config['xtp'].values
+        order = self.config['order']
         x = x[cname]
         w = ones((N, 1))
         ytp = ['bin']
@@ -62,11 +58,7 @@ class Node:
         tic()
         sb = sbng(ub)       # supervised binning
         toc('SBNG')
-        # print(sb)
-
-        df = pd.DataFrame(sb)
-        print(df)
-        df.to_json('sb_result')
+        print(sb[0])
         print('Finished successfully!')
 
     def prune():
