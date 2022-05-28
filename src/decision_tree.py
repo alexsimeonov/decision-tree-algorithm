@@ -4,7 +4,7 @@ import pandas as pd
 class DecisionTree:
     def __init__(self, x, y, config, hyperparams):
         self.hyperparams = hyperparams
-        self.structure = None
+        self.structure = []
         # Initialize the root node, using the data passed to the DT
         self.root_node = Node(self.hyperparams, x, y, config)
 

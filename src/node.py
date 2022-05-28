@@ -9,6 +9,7 @@ from enum import Enum
 from aislab.dp_feng.binenc import *
 from aislab.gnrl import *
 import pandas as pd
+from utils import filter_dictionary
 
 class Status(Enum):
     ROOT = 0
@@ -20,7 +21,7 @@ class Node:
     def __init__(self, params, x, y, config, parent=None):
         self.params = params
         self.parent = parent # If present
-        self.children = None # Add children after split
+        self.children = [] # Add children after split
         self.status = Status.TERMINAL
         self.x = x
         self.y = y
@@ -48,18 +49,46 @@ class Node:
         dlm = '$'
         # 1. All categorical vars to int
         tic()
-        xe = enc_int(x, cname, xtp, vtp, order, dsp, dlm)
+        self.xe = enc_int(x, cname, xtp, vtp, order, dsp, dlm)
         toc('INT-ENCODING')
 
         # 2. BINNING
         tic()
-        ub = ubng(xe, xtp, w, y=y, ytp=ytp, cnames=cname)     # unsupervised binning
-        toc('UBNG')
+        ub = ubng(self.xe, xtp, w, y=y, ytp=ytp, cnames=cname)     # unsupervised binning
+        toc('UBNG finished successfully.')
         tic()
         sb = sbng(ub)       # supervised binning
-        toc('SBNG')
-        print(sb[0])
+        toc('SBNG finished successfully.')
+        best_split = self.get_best_split(sb)
+
+        # # get only the 'Normal' bins and form the node's children from them
+        normal_bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal')
+        self.define_node_chidren(normal_bins, best_split[0]['cname'])
+        print(self.children)
         print('Finished successfully!')
+
+    def get_best_split(self, binning_result):
+        best_split_variable = filter(lambda variable: variable['st'][0]['Chi2'][0] == max(map(lambda var: var['st'][0]['Chi2'][0], binning_result)), binning_result)
+        return list(best_split_variable)
+
+    def define_node_chidren(self, bins, column_name):
+        # currently using lists for the structures that I am building
+        # discuss if this is optimal or should use dictionaries instead
+        for (key, value) in bins.items():
+            self.children.append(self.compose_child(value, column_name))
+
+    def compose_child(self, bin, column_name):
+        child_x = None
+        child_y = None
+
+        if len(bin['lb']) and not len(bin['rb']):
+            child_x = self.xe[(self.xe[column_name].isin(bin['lb']))]
+        elif len(bin['lb']) == 1 | len(bin['rb']) == 1:
+            child_x = self.xe[(column_name >= bin['lb'][0]) and (column_name <= bin['rb'][0])]
+
+        child_y = self.y[self.y.index.isin(list(child_x.index))]
+
+        return Node(self.params, child_x, child_y, self.config)
 
     def prune():
         print("pruning")
