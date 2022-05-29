@@ -53,7 +53,6 @@ class Node:
         tic()
         xe = enc_int(x, cname, xtp, vtp, order, dsp, dlm)
         toc('INT-ENCODING')
-
         return { 'xe': xe, 'y': y, 'xtp': xtp, 'ytp': ytp, 'vtp': vtp, 'w': w, 'cname': cname }
 
     def binning(self, encoded_values):
@@ -64,7 +63,6 @@ class Node:
         tic()
         sb = sbng(ub)       # supervised binning
         toc('SBNG finished successfully.')
-
         return { 'ub': ub, 'sb': sb }
 
     def get_best_split(self, binning_result):
@@ -92,5 +90,4 @@ class Node:
                 current_x = x[(column_name >= bin['lb'][0]) and (column_name <= bin['rb'][0])]
 
         current_y = y[y.index.isin(list(current_x.index))]
-
         return { 'x': current_x, 'y': current_y, 'column_name': column_name }
