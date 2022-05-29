@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec  7 23:38:36 2021
-
-@author: alexs
-"""
-
 from enum import Enum
 from aislab.dp_feng.binenc import *
 from aislab.gnrl import *
