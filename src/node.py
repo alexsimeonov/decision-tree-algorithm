@@ -11,29 +11,38 @@ class Status(Enum):
     LEAF = 3
 
 class Node:
-    def __init__(self, params, x, y, config, parent=None):
+    def __init__(self, params, bin=None):
         self.params = params
-        self.parent = parent # If present
         self.children = [] # Add children after split
-        self.status = Status.TERMINAL
-        self.x = x
-        self.y = y
-        self.config = config
+        self.bin = bin
+        self.status = Status.TERMINAL if self.bin else Status.ROOT
 
-    def split(self):
-        print("Node starts splitting.")
+    def split(self, x, y, config, column_name=None):
+        print('Node starts splitting.')
 
+        self_data = self.compose_self_data(self.bin, x, y, column_name)
+        encoded_values = self.encode_values(self_data['x'], self_data['y'], config)
+        binning_result = self.binning(encoded_values)
+        best_split = self.get_best_split(binning_result['sb'])
+
+        # get only the 'Normal' bins and form the node's children from them
+        normal_bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal')
+        self.define_node_chidren(normal_bins)
+
+        print('Finished successfully!')
+
+    def encode_values(self, x, y, config):
         N = 1000 # x.shape[0]
 
-        x = self.x.iloc[:N, :]
-        y = self.y.iloc[:N, :].values
+        x = x.iloc[:N, :]
+        y = y.iloc[:N, :].values
 
         tic2() # Overall time
 
-        cname = self.config['cnames'].tolist()
-        xtp = self.config['xtp'].values
-        vtp = self.config['xtp'].values
-        order = self.config['order']
+        cname = config['cnames'].tolist()
+        xtp = config['xtp'].values
+        vtp = config['xtp'].values
+        order = config['order']
         x = x[cname]
         w = ones((N, 1))
         ytp = ['bin']
@@ -42,47 +51,46 @@ class Node:
         dlm = '$'
         # 1. All categorical vars to int
         tic()
-        self.xe = enc_int(x, cname, xtp, vtp, order, dsp, dlm)
+        xe = enc_int(x, cname, xtp, vtp, order, dsp, dlm)
         toc('INT-ENCODING')
 
+        return { 'xe': xe, 'y': y, 'xtp': xtp, 'ytp': ytp, 'vtp': vtp, 'w': w, 'cname': cname }
+
+    def binning(self, encoded_values):
         # 2. BINNING
         tic()
-        ub = ubng(self.xe, xtp, w, y=y, ytp=ytp, cnames=cname)     # unsupervised binning
+        ub = ubng(encoded_values['xe'], encoded_values['xtp'], encoded_values['w'], y=encoded_values['y'], ytp=encoded_values['ytp'], cnames=encoded_values['cname'])     # unsupervised binning
         toc('UBNG finished successfully.')
         tic()
         sb = sbng(ub)       # supervised binning
         toc('SBNG finished successfully.')
-        best_split = self.get_best_split(sb)
 
-        # # get only the 'Normal' bins and form the node's children from them
-        normal_bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal')
-        self.define_node_chidren(normal_bins, best_split[0]['cname'])
-        print(self.children)
-        print('Finished successfully!')
+        return { 'ub': ub, 'sb': sb }
 
     def get_best_split(self, binning_result):
         best_split_variable = filter(lambda variable: variable['st'][0]['Chi2'][0] == max(map(lambda var: var['st'][0]['Chi2'][0], binning_result)), binning_result)
         return list(best_split_variable)
 
-    def define_node_chidren(self, bins, column_name):
+    def define_node_chidren(self, bins):
         # currently using lists for the structures that I am building
         # discuss if this is optimal or should use dictionaries instead
         for (key, value) in bins.items():
-            self.children.append(self.compose_child(value, column_name))
+            child = self.compose_child(value)
+            self.children.append(child)
 
-    def compose_child(self, bin, column_name):
-        child_x = None
-        child_y = None
+    def compose_child(self, bin):
+        return Node(self.params, bin)
 
-        if len(bin['lb']) and not len(bin['rb']):
-            child_x = self.xe[(self.xe[column_name].isin(bin['lb']))]
-        elif len(bin['lb']) == 1 | len(bin['rb']) == 1:
-            child_x = self.xe[(column_name >= bin['lb'][0]) and (column_name <= bin['rb'][0])]
+    def compose_self_data(self, bin, x, y, column_name):
+        current_x = x
+        current_y = y
 
-        child_y = self.y[self.y.index.isin(list(child_x.index))]
+        if self.status != Status.ROOT:
+            if len(bin['lb']) and not len(bin['rb']):
+                current_x = x[(x[column_name].isin(bin['lb']))]
+            elif len(bin['lb']) == 1 | len(bin['rb']) == 1:
+                current_x = x[(column_name >= bin['lb'][0]) and (column_name <= bin['rb'][0])]
 
-        return Node(self.params, child_x, child_y, self.config)
+        current_y = y[y.index.isin(list(current_x.index))]
 
-    def prune():
-        print("pruning")
-        #for the pruning phase, not yet implemented
+        return { 'x': current_x, 'y': current_y, 'column_name': column_name }

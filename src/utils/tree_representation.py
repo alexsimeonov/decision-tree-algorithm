@@ -1,6 +1,6 @@
 from treelib import Node, Tree
 
-def represent_tree(self, list):
+def represent_tree(list):
     root, *tail = list
     tree = Tree()
     node = Node(root)
@@ -18,3 +18,5 @@ def represent_tree(self, list):
                 queue.append([node, *tail])
             else:
                 tree.create_node(child, parent=parent)
+
+    tree.show()
