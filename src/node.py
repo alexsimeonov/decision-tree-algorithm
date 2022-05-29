@@ -2,7 +2,7 @@ from enum import Enum
 from aislab.dp_feng.binenc import *
 from aislab.gnrl import *
 import pandas as pd
-from utils import filter_dictionary
+from utils.dictionary_utils import filter_dictionary
 
 class Status(Enum):
     ROOT = 0
