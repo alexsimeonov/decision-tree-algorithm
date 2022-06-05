@@ -12,6 +12,7 @@ class DecisionTree:
         # Initialize the root node, using the data passed to the DT
         self.root_node = Node(self.hyperparams)
         self.structure.append(self.root_node)
+        self.dictionary_structure = self.root_node
 
     def grow(self):
         print('Decision tree starts growing.')
