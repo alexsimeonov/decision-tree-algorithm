@@ -16,14 +16,15 @@ class Node:
         self.children = [] # Add children after split
         self.bin = bin
         self.status = Status.TERMINAL if self.bin else Status.ROOT
+        self.binning_results = None
 
     def split(self, x, y, config, column_name=None):
         print('Node starts splitting.')
 
         self_data = self.compose_self_data(self.bin, x, y, column_name)
         encoded_values = self.encode_values(self_data['x'], self_data['y'], config)
-        binning_result = self.binning(encoded_values)
-        best_split = self.get_best_split(binning_result['sb'])
+        self.binning_results = self.binning(encoded_values)
+        best_split = self.get_best_split(self.binning_results['sb'])
 
         # get only the 'Normal' bins and form the node's children from them
         normal_bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal')
@@ -66,7 +67,7 @@ class Node:
         return { 'ub': ub, 'sb': sb }
 
     def get_best_split(self, binning_result):
-        best_split_variable = filter(lambda variable: variable['st'][0]['Chi2'][0] == max(map(lambda var: var['st'][0]['Chi2'][0], binning_result)), binning_result)
+        best_split_variable = filter(lambda variable: variable['st'][0][self.params['criterion']][0] == max(map(lambda var: var['st'][0][self.params['criterion']][0], binning_result)), binning_result)
         return list(best_split_variable)
 
     def define_node_chidren(self, bins):
