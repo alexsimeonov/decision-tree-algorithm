@@ -27,8 +27,11 @@ class Node:
         best_split = self.get_best_split(self.binning_results['sb'])
 
         # get only the 'Normal' bins and form the node's children from them
-        normal_bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal')
+        normal_bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal' or bin['type'] == 'Missing')
         self.define_node_chidren(normal_bins)
+
+        for child in self.children:
+            child.split(self_data['x'], self_data['y'], config, best_split[0]['cname'])
 
         print('Finished successfully!')
 
@@ -85,10 +88,14 @@ class Node:
         current_y = y
 
         if self.status != Status.ROOT:
-            if len(bin['lb']) and not len(bin['rb']):
-                current_x = x[(x[column_name].isin(bin['lb']))]
-            elif len(bin['lb']) == 1 | len(bin['rb']) == 1:
-                current_x = x[(column_name >= bin['lb'][0]) and (column_name <= bin['rb'][0])]
+            if bin['type'] == 'Normal':
+                if len(bin['lb']) and not len(bin['rb']):
+                    current_x = x[(x[column_name].isin(bin['lb']))]
+                elif len(bin['lb']) == 1 | len(bin['rb']) == 1:
+                    current_x = x[(column_name >= bin['lb'][0]) and (column_name <= bin['rb'][0])]
+            elif bin['type'] == 'Missing':
+                current_x = x[(x[column_name].isnull().values.any())]
+                print(current_x)
 
         current_y = y[y.index.isin(list(current_x.index))]
         return { 'x': current_x, 'y': current_y, 'column_name': column_name }
