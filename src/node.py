@@ -18,51 +18,28 @@ class Node:
         self.status = Status.TERMINAL if self.bin else Status.ROOT
         self.binning_results = None
 
-    def split(self, x, y, config, column_name=None):
+    def split(self, encoded_values, config, column_name=None):
         print('Node starts splitting.')
-
-        self_data = self.compose_self_data(self.bin, x, y, column_name)
-        encoded_values = self.encode_values(self_data['x'], self_data['y'], config)
+        self_data = self.compose_self_data(self.bin, encoded_values['x'], encoded_values['y'], column_name)
         self.binning_results = self.binning(encoded_values)
         best_split = self.get_best_split(self.binning_results['sb'])
 
-        # get only the 'Normal' bins and form the node's children from them
-        normal_bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal' or bin['type'] == 'Missing')
-        self.define_node_chidren(normal_bins)
+        bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal' or bin['type'] == 'Missing')
+        self.define_node_chidren(bins)
+        encoded_values.update({ 'x': self_data['x'], 'y': self_data['y'] })
 
-        for child in self.children:
-            child.split(self_data['x'], self_data['y'], config, best_split[0]['cname'])
+        print('CHILDREN: ', self.children)
+        # for child in self.children:
+            # child.split(encoded_values, config, best_split[0]['cname'])
+            # print('BIN: ', child.bin)
 
         print('Finished successfully!')
-
-    def encode_values(self, x, y, config):
-        N = 1000 # x.shape[0]
-
-        x = x.iloc[:N, :]
-        y = y.iloc[:N, :].values
-
-        tic2() # Overall time
-
-        cname = config['cnames'].tolist()
-        xtp = config['xtp'].values
-        vtp = config['xtp'].values
-        order = config['order']
-        x = x[cname]
-        w = ones((N, 1))
-        ytp = ['bin']
-        dsp = 1
-        order = order.values
-        dlm = '$'
-        # 1. All categorical vars to int
-        tic()
-        xe = enc_int(x, cname, xtp, vtp, order, dsp, dlm)
-        toc('INT-ENCODING')
-        return { 'xe': xe, 'y': y, 'xtp': xtp, 'ytp': ytp, 'vtp': vtp, 'w': w, 'cname': cname }
 
     def binning(self, encoded_values):
         # 2. BINNING
         tic()
-        ub = ubng(encoded_values['xe'], encoded_values['xtp'], encoded_values['w'], y=encoded_values['y'], ytp=encoded_values['ytp'], cnames=encoded_values['cname'])     # unsupervised binning
+        y = encoded_values['y'].values
+        ub = ubng(encoded_values['x'], encoded_values['xtp'], encoded_values['w'], y=y, ytp=encoded_values['ytp'], cnames=encoded_values['cname'])     # unsupervised binning
         toc('UBNG finished successfully.')
         tic()
         sb = sbng(ub)       # supervised binning
