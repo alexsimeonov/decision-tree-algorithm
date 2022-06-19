@@ -16,11 +16,15 @@ config_path = '/Users/alexandersimeonov/Documents/Development/University/decisio
 sys.path.append(wpath)
 os.chdir(wpath)
 
-class Criterion(Enum):
-    GINI = 'gini'
-    ENTROPY = 'entropy'
+criterion_options = ['Gini', 'Chi2']
+criterion = input('Enter desired criterion for the Binning algorithm ("Gini" or "Chi2") decision tree: ')
 
-print('The Criterion used by the binning algorithm is Chi2')
+if criterion not in criterion_options:
+    raise Exception('Value for criterion should be either "Gini" or "Chi2".')
+
+
+print('The Criterion used by the binning algorithm is:', criterion)
+initial_dataset_samples_count = int(input('Enter the number of samples from the dataset you want to use for the algorithm: '))
 max_depth = input('Enter desired max depth of decision tree: ')
 min_samples_split = input('Enter minimum samples in a node after split: ')
 min_samples_leaf = input('Enter minimum samples in a leaf node: ')
@@ -28,6 +32,10 @@ max_children_count = input('Enter maximum number of children per node: ')
 
 hyperparams = {}
 
+hyperparams['criterion'] = criterion
+
+if initial_dataset_samples_count:
+    hyperparams['initial_dataset_samples_count'] = initial_dataset_samples_count
 if max_depth:
     hyperparams['max_depth'] = max_depth
 if min_samples_split:
