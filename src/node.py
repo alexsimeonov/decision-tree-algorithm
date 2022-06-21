@@ -48,10 +48,10 @@ class Node:
         # 2. BINNING
         tic()
         y = encoded_values['y'].values
-        ub = ubng(encoded_values['x'], encoded_values['xtp'], encoded_values['w'], y=y, ytp=encoded_values['ytp'], cnames=encoded_values['cname'])     # unsupervised binning
+        ub = ubng(encoded_values['x'], encoded_values['xtp'], encoded_values['w'], y=y, ytp=encoded_values['ytp'], cnames=encoded_values['cname'], md=self.params['max_children_count'], nmin=self.params['min_samples_split'])     # unsupervised binning
         toc('UBNG finished successfully.')
         tic()
-        sb = sbng(ub)       # supervised binning
+        sb = sbng(ub, md=self.params['max_children_count'])       # supervised binning
         toc('SBNG finished successfully.')
         return { 'ub': ub, 'sb': sb }
 

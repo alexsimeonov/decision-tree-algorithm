@@ -26,8 +26,8 @@ if criterion not in criterion_options:
 print('The Criterion used by the binning algorithm is:', criterion)
 initial_dataset_samples_count = int(input('Enter the number of samples from the dataset you want to use for the algorithm: '))
 max_depth = int(input('Enter desired max depth of decision tree: '))
-min_samples_split = input('Enter minimum samples in a node after split: ')
-max_children_count = input('Enter maximum number of children per node: ')
+max_children_count = int(input('Enter maximum number of children per node: '))
+min_samples_split = int(input('Enter minimum samples in a node after split: '))
 
 hyperparams = {}
 
