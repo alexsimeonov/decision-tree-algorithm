@@ -1,9 +1,10 @@
+import copy
+import pandas as pd
+
 from enum import Enum
 from aislab.dp_feng.binenc import *
 from aislab.gnrl import *
-import pandas as pd
 from utils.dictionary_utils import filter_dictionary
-import copy
 
 class Status(Enum):
     ROOT = 0
@@ -23,7 +24,7 @@ class Node:
     def split(self, encoded_values, config, column_name=None):
         print('Node starts splitting.')
         self_data = self.compose_self_data(self.bin, encoded_values['x'], encoded_values['y'], column_name)
-        print('Per Node:', self.status, 'inc:', len(encoded_values['y']), 'self:', len(self_data['y']), column_name, self.bin)
+        # print('Per Node:', self.status, 'inc:', len(encoded_values['y']), 'self:', len(self_data['y']), column_name, self.bin)
         self.binning_results = self.binning(encoded_values)
         best_split = self.get_best_split(self.binning_results['sb'])
 
@@ -33,16 +34,15 @@ class Node:
         updated_encoded_values = copy.deepcopy(encoded_values)
         updated_encoded_values.update({ 'x': self_data['x'], 'y': self_data['y'], 'w': self_data['w'] })
 
-        if len(updated_encoded_values['y']) == 0 or (self.status != Status.ROOT and len(updated_encoded_values['x']) != old_records_length):
+        if len(updated_encoded_values['x']) < 2 * self.params['min_samples_split']:
             self.status = Status.LEAF
 
-        if (self.status != Status.LEAF) and (self.level < self.params['max_depth']) and (len(updated_encoded_values['y'])) and (self.status == Status.ROOT or len(updated_encoded_values['x']) != old_records_length):
+        if (self.status != Status.LEAF) and (self.level < self.params['max_depth']):
             for idx, child in enumerate(self.children):
-                print('SPLITTING CHILD AT LEVEL', self.level, ':', idx + 1)
-                print(child.bin)
+                # print('SPLITTING CHILD AT LEVEL', self.level, ':', idx + 1, 'by', best_split[0]['cname'])
                 child.split(updated_encoded_values, config, best_split[0]['cname'])
 
-        print('Finished successfully!')
+        print('Node split finished successfully.')
 
     def binning(self, encoded_values):
         # 2. BINNING
@@ -76,7 +76,7 @@ class Node:
                 if len(bin['lb']) and not len(bin['rb']):
                     current_x = x[(x[column_name].isin(bin['lb']))]
                 elif len(bin['lb']) == 1 | len(bin['rb']) == 1:
-                    current_x = x[(column_name >= bin['lb'][0]) and (column_name <= bin['rb'][0])]
+                    current_x = x[x[column_name].between(float(bin['lb'][0]), float(bin['rb'][0]))]
 
         current_y = y[y.index.isin(list(current_x.index))]
         current_w = ones((len(current_x.index), 1))

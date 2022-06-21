@@ -20,6 +20,7 @@ class DecisionTree:
         print('Decision tree starts growing.')
         encoded_values = self.encode_values(self.x, self.y, self.config)
         self.root_node.split(encoded_values, self.config)
+        print('Decision tree growing phase successful.')
 
     def represent_structure(self):
         represent_tree(self.structure)
