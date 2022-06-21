@@ -3,6 +3,7 @@ from aislab.dp_feng.binenc import *
 from aislab.gnrl import *
 import pandas as pd
 from utils.dictionary_utils import filter_dictionary
+import copy
 
 class Status(Enum):
     ROOT = 0
@@ -11,27 +12,37 @@ class Status(Enum):
     LEAF = 3
 
 class Node:
-    def __init__(self, params, bin=None):
+    def __init__(self, params, bin=None, parent_level=0):
         self.params = params
         self.children = [] # Add children after split
         self.bin = bin
         self.status = Status.TERMINAL if self.bin else Status.ROOT
         self.binning_results = None
+        self.level = parent_level + 1 if self.bin else parent_level
 
     def split(self, encoded_values, config, column_name=None):
         print('Node starts splitting.')
         self_data = self.compose_self_data(self.bin, encoded_values['x'], encoded_values['y'], column_name)
+        print('Per Node:', self.status, 'inc:', len(encoded_values['y']), 'self:', len(self_data['y']), column_name, self.bin)
         self.binning_results = self.binning(encoded_values)
         best_split = self.get_best_split(self.binning_results['sb'])
 
-        bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal' or bin['type'] == 'Missing')
+        bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal')
+        print('BINS:', bins)
         self.define_node_chidren(bins)
-        encoded_values.update({ 'x': self_data['x'], 'y': self_data['y'] })
+        print('CHILDREN:', self.children)
+        old_records_length = len(encoded_values['x'])
+        updated_encoded_values = copy.deepcopy(encoded_values)
+        updated_encoded_values.update({ 'x': self_data['x'], 'y': self_data['y'], 'w': self_data['w'] })
 
-        print('CHILDREN: ', self.children)
-        # for child in self.children:
-            # child.split(encoded_values, config, best_split[0]['cname'])
-            # print('BIN: ', child.bin)
+        if len(updated_encoded_values['y']) == 0 or (self.status != Status.ROOT and len(updated_encoded_values['x']) != old_records_length):
+            self.status = Status.LEAF
+
+        if (self.status != Status.LEAF) and (self.level < self.params['max_depth']) and (len(updated_encoded_values['y'])) and (self.status == Status.ROOT or len(updated_encoded_values['x']) != old_records_length):
+            for idx, child in enumerate(self.children):
+                print('SPLITTING CHILD AT LEVEL', self.level, ':', idx + 1)
+                print(child.bin)
+                child.split(updated_encoded_values, config, best_split[0]['cname'])
 
         print('Finished successfully!')
 
@@ -51,14 +62,12 @@ class Node:
         return list(best_split_variable)
 
     def define_node_chidren(self, bins):
-        # currently using lists for the structures that I am building
-        # discuss if this is optimal or should use dictionaries instead
         for (key, value) in bins.items():
             child = self.compose_child(value)
             self.children.append(child)
 
     def compose_child(self, bin):
-        return Node(self.params, bin)
+        return Node(self.params, bin, self.level)
 
     def compose_self_data(self, bin, x, y, column_name):
         current_x = x
@@ -70,9 +79,8 @@ class Node:
                     current_x = x[(x[column_name].isin(bin['lb']))]
                 elif len(bin['lb']) == 1 | len(bin['rb']) == 1:
                     current_x = x[(column_name >= bin['lb'][0]) and (column_name <= bin['rb'][0])]
-            elif bin['type'] == 'Missing':
-                current_x = x[(x[column_name].isnull().values.any())]
-                print(current_x)
 
         current_y = y[y.index.isin(list(current_x.index))]
-        return { 'x': current_x, 'y': current_y, 'column_name': column_name }
+        current_w = ones((len(current_x.index), 1))
+
+        return { 'x': current_x, 'y': current_y, 'w': current_w, 'column_name': column_name }
