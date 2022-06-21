@@ -1,5 +1,6 @@
 import copy
 import pandas as pd
+import uuid
 
 from enum import Enum
 from aislab.dp_feng.binenc import *
@@ -21,10 +22,8 @@ class Node:
         self.binning_results = None
         self.level = parent_level + 1 if self.bin else parent_level
 
-    def split(self, encoded_values, config, column_name=None):
-        print('Node starts splitting.')
+    def split(self, encoded_values, config, tree, column_name=None, parent_id=None):
         self_data = self.compose_self_data(self.bin, encoded_values['x'], encoded_values['y'], column_name)
-        # print('Per Node:', self.status, 'inc:', len(encoded_values['y']), 'self:', len(self_data['y']), column_name, self.bin)
         self.binning_results = self.binning(encoded_values)
         best_split = self.get_best_split(self.binning_results['sb'])
 
@@ -37,12 +36,23 @@ class Node:
         if len(updated_encoded_values['x']) < 2 * self.params['min_samples_split']:
             self.status = Status.LEAF
 
-        if (self.status != Status.LEAF) and (self.level < self.params['max_depth']):
+        if (self.status != Status.LEAF) and (self.level < self.params['max_depth']) and len(self.children) > 1:
             for idx, child in enumerate(self.children):
-                # print('SPLITTING CHILD AT LEVEL', self.level, ':', idx + 1, 'by', best_split[0]['cname'])
-                child.split(updated_encoded_values, config, best_split[0]['cname'])
 
-        print('Node split finished successfully.')
+                treelib_node_id = uuid.uuid4()
+                treelib_node_label = self.compose_node_label(best_split[0]['cname'], idx)
+                self.update_tree_structure(tree, treelib_node_id, parent_id, treelib_node_label)
+
+                child.split(updated_encoded_values, config, tree, best_split[0]['cname'], parent_id=treelib_node_id)
+
+    def update_tree_structure(self, tree, id, parent_id, label):
+        if self.level == 1:
+            tree.create_node(label, id, parent='root')
+        elif self.level != 0 and self.level != 1:
+            tree.create_node(label, id, parent=parent_id)
+
+    def compose_node_label(self, column_name, index):
+        return column_name + '_' + str(self.level) + '_' + str(index)
 
     def binning(self, encoded_values):
         # 2. BINNING

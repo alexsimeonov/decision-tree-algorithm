@@ -1,29 +1,32 @@
-from node import Node
 import pandas as pd
+
+from node import Node
 from utils.tree_representation import represent_tree
 from aislab.dp_feng.binenc import *
 from aislab.gnrl import *
+from treelib import Node as TreelibNode, Tree
 
 class DecisionTree:
     def __init__(self, x, y, config, hyperparams):
         self.hyperparams = hyperparams
-        self.structure = []
         self.x = x
         self.y = y
         self.config = config
         # Initialize the root node, using the data passed to the DT
         self.root_node = Node(self.hyperparams)
-        self.structure.append(self.root_node)
         self.dictionary_structure = self.root_node
+        self.structure = Tree()
 
     def grow(self):
         print('Decision tree starts growing.')
         encoded_values = self.encode_values(self.x, self.y, self.config)
-        self.root_node.split(encoded_values, self.config)
+        self.structure.create_node('Root', 'root')
+        self.root_node.split(encoded_values, self.config, tree=self.structure)
         print('Decision tree growing phase successful.')
 
     def represent_structure(self):
-        represent_tree(self.structure)
+        print('Decision tree structure representation:\n')
+        self.structure.show()
 
     def encode_values(self, x, y, config):
         tic2() # Overall time
