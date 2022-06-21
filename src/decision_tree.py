@@ -1,7 +1,6 @@
 import pandas as pd
 
 from node import Node
-from utils.tree_representation import represent_tree
 from aislab.dp_feng.binenc import *
 from aislab.gnrl import *
 from treelib import Node as TreelibNode, Tree
