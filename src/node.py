@@ -28,9 +28,7 @@ class Node:
         best_split = self.get_best_split(self.binning_results['sb'])
 
         bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal')
-        print('BINS:', bins)
         self.define_node_chidren(bins)
-        print('CHILDREN:', self.children)
         old_records_length = len(encoded_values['x'])
         updated_encoded_values = copy.deepcopy(encoded_values)
         updated_encoded_values.update({ 'x': self_data['x'], 'y': self_data['y'], 'w': self_data['w'] })

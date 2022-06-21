@@ -27,7 +27,6 @@ print('The Criterion used by the binning algorithm is:', criterion)
 initial_dataset_samples_count = int(input('Enter the number of samples from the dataset you want to use for the algorithm: '))
 max_depth = int(input('Enter desired max depth of decision tree: '))
 min_samples_split = input('Enter minimum samples in a node after split: ')
-min_samples_leaf = input('Enter minimum samples in a leaf node: ')
 max_children_count = input('Enter maximum number of children per node: ')
 
 hyperparams = {}
@@ -40,8 +39,6 @@ if max_depth:
     hyperparams['max_depth'] = max_depth
 if min_samples_split:
     hyperparams['min_samples_split'] = min_samples_split
-if min_samples_leaf:
-    hyperparams['min_samples_leaf'] = min_samples_leaf
 if max_children_count:
     hyperparams['max_children_count'] = max_children_count
 
