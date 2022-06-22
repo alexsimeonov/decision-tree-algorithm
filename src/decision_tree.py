@@ -15,6 +15,7 @@ class DecisionTree:
         self.root_node = Node(self.hyperparams)
         self.dictionary_structure = self.root_node
         self.structure = Tree()
+        self.statistics = { 'leaf_count': 0, 'nodes_count': 1, 'growing_time': None }
 
     def grow(self):
         print('Decision tree starts growing.')
