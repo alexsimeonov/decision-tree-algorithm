@@ -22,8 +22,9 @@ class Node:
         self.binning_results = None
         self.level = parent_level + 1 if self.bin else parent_level
 
-    def split(self, encoded_values, config, tree, index=None, column_name=None, parent_id=None):
+    def split(self, encoded_values, statistics, config, tree, index=None, column_name=None, parent_id=None):
         self_data = self.compose_self_data(self.bin, encoded_values['x'], encoded_values['y'], column_name)
+        statistics['nodes_count'] += 1
         self.binning_results = self.binning(encoded_values)
         best_split = self.get_best_split(self.binning_results['sb'])
 
@@ -33,16 +34,22 @@ class Node:
         updated_encoded_values = copy.deepcopy(encoded_values)
         updated_encoded_values.update({ 'x': self_data['x'], 'y': self_data['y'], 'w': self_data['w'] })
 
-        if len(updated_encoded_values['x']) < 2 * self.params['min_samples_split']:
-            self.status = Status.LEAF
-
         treelib_node_id = uuid.uuid4()
         treelib_node_label = self.compose_node_label(best_split[0]['cname'], index)
         self.update_tree_structure(tree, treelib_node_id, parent_id, treelib_node_label)
 
+        if (len(updated_encoded_values['x']) < (2 * self.params['min_samples_split'])) or len(self.children) == 0:
+            self.status = Status.LEAF
+
         if (self.status != Status.LEAF) and (self.level < self.params['max_depth']) and len(self.children) > 1:
+            self.status = Status.DECISION
             for idx, child in enumerate(self.children):
-                child.split(updated_encoded_values, config, tree, idx, best_split[0]['cname'], parent_id=treelib_node_id)
+                child.split(updated_encoded_values, statistics, config, tree, idx, best_split[0]['cname'], parent_id=treelib_node_id)
+        else:
+            self.status = Status.LEAF
+
+        if self.status == Status.LEAF:
+            statistics['leaf_count'] += 1
 
     def update_tree_structure(self, tree, id, parent_id, label):
         if self.level == 1:
