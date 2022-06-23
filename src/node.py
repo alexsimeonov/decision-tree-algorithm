@@ -29,12 +29,17 @@ class Node:
         best_split = self.get_best_split(self.binning_results['sb'], column_name)
         bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal')
 
-        if (self.status == Status.ROOT or self.level == 1) or column_name != best_split[0]['cname']:
-            self.define_node_chidren(bins)
-
         old_records_length = len(encoded_values['x'])
         updated_encoded_values = copy.deepcopy(encoded_values)
         updated_encoded_values.update({ 'x': self_data['x'], 'y': self_data['y'], 'w': self_data['w'] })
+
+        if (self.status == Status.ROOT or self.level == 1) or column_name != best_split[0]['cname']:
+            self.define_node_chidren(bins)
+        else:
+            self.status = Status.LEAF
+
+        if (len(updated_encoded_values['x']) < (2 * self.params['min_samples_split'])) or len(self.children) <= 1:
+            self.status = Status.LEAF
 
         treelib_node_id = uuid.uuid4()
         treelib_node_label = 'Root' if self.status == Status.ROOT else self.compose_node_label(best_split[0]['cname'], index)
@@ -42,10 +47,7 @@ class Node:
 
         # Adding statistics for current node into the tree table
         if self.status != Status.ROOT:
-            node_statistics.append({ 'parent': parent_label, 'split_variable_name': treelib_node_label, 'number_of_children': len(self.children), 'Gini': best_split[0]['st'][0]['Gini'][0], 'Chi2': best_split[0]['st'][0]['Chi2'][0] })
-
-        if (len(updated_encoded_values['x']) < (2 * self.params['min_samples_split'])) or len(self.children) <= 1:
-            self.status = Status.LEAF
+            node_statistics.append({ 'parent': parent_label, 'split_variable_name': treelib_node_label, 'number_of_children': len(self.children) if self.status != Status.LEAF else 0, 'Gini': best_split[0]['st'][0]['Gini'][0], 'Chi2': best_split[0]['st'][0]['Chi2'][0] })
 
         # Splitting children
         if (self.status != Status.LEAF) and (self.level < self.params['max_depth']) and len(self.children) > 1:
