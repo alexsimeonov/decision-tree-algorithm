@@ -16,13 +16,14 @@ class DecisionTree:
         self.dictionary_structure = self.root_node
         self.structure = Tree()
         self.statistics = { 'leaf_count': 0, 'nodes_count': 0 }
+        self.statistics_per_node = []
 
     def grow(self):
         tic3()
         print('Decision tree starts growing.')
         encoded_values = self.encode_values(self.x, self.y, self.config)
         self.structure.create_node('Root', 'root')
-        self.root_node.split(encoded_values, self.statistics, self.config, tree=self.structure)
+        self.root_node.split(encoded_values, self.statistics, self.statistics_per_node, self.config, tree=self.structure)
         toc3('Decision tree growing phase successful in')
 
     def represent_structure(self):
@@ -33,6 +34,8 @@ class DecisionTree:
     def report_statistics(self):
         print('Decision tree statistics:')
         print(self.statistics)
+        print('Detailed statistics per node:')
+        print(pd.DataFrame(self.statistics_per_node))
 
     def encode_values(self, x, y, config):
         tic2() # Overall time
