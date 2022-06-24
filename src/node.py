@@ -22,12 +22,21 @@ class Node:
         self.binning_results = None
         self.level = parent_level + 1 if self.bin else parent_level
 
-    def split(self, encoded_values, tree_statistics, node_statistics, config, tree, index=None, column_name=None, parent_id=None, parent_label='Root'):
-        self_data = self.compose_self_data(self.bin, encoded_values['x'], encoded_values['y'], column_name)
+    def split(
+        self, encoded_values,
+        tree_statistics, node_statistics,
+        config, tree,
+        index=None, column_name=None,
+        parent_id=None, parent_label='Root'):
+        self_data = self.compose_self_data(
+            self.bin, encoded_values['x'],
+            encoded_values['y'], column_name)
         tree_statistics['nodes_count'] += 1
         self.binning_results = self.binning(encoded_values)
         best_split = self.get_best_split(self.binning_results['sb'], column_name)
-        bins = filter_dictionary(best_split[0]['bns'], lambda bin: bin['type'] == 'Normal')
+        bins = filter_dictionary(
+            best_split[0]['bns'],
+            lambda bin: bin['type'] == 'Normal')
 
         old_records_length = len(encoded_values['x'])
         updated_encoded_values = copy.deepcopy(encoded_values)
@@ -47,13 +56,24 @@ class Node:
 
         # Adding statistics for current node into the tree table
         if self.status != Status.ROOT:
-            node_statistics.append({ 'parent': parent_label, 'split_variable_name': treelib_node_label, 'number_of_children': len(self.children) if self.status != Status.LEAF else 0, 'Gini': best_split[0]['st'][0]['Gini'][0], 'Chi2': best_split[0]['st'][0]['Chi2'][0] })
+            node_statistics.append(
+                {
+                    'parent': parent_label,
+                    'split_variable_name': treelib_node_label,
+                    'number_of_children': len(self.children) if self.status != Status.LEAF else 0,
+                    'Gini': best_split[0]['st'][0]['Gini'][0],
+                    'Chi2': best_split[0]['st'][0]['Chi2'][0]
+                })
 
         # Splitting children
         if (self.status != Status.LEAF) and (self.level < self.params['max_depth']) and len(self.children) > 1:
             self.status = Status.DECISION
             for idx, child in enumerate(self.children):
-                child.split(updated_encoded_values, tree_statistics, node_statistics, config, tree, idx, best_split[0]['cname'], parent_id=treelib_node_id, parent_label=treelib_node_label)
+                child.split(
+                    updated_encoded_values, tree_statistics,
+                    node_statistics, config, tree,
+                    idx, best_split[0]['cname'],
+                    parent_id=treelib_node_id, parent_label=treelib_node_label)
 
         if self.status == Status.LEAF:
             tree_statistics['leaf_count'] += 1
@@ -78,7 +98,11 @@ class Node:
         # 2. BINNING
         tic()
         y = encoded_values['y'].values
-        ub = ubng(encoded_values['x'], encoded_values['xtp'], encoded_values['w'], y=y, ytp=encoded_values['ytp'], cnames=encoded_values['cname'], md=self.params['max_children_count'], nmin=self.params['min_samples_split'])     # unsupervised binning
+        ub = ubng(
+            encoded_values['x'], encoded_values['xtp'],
+            encoded_values['w'], y=y,
+            ytp=encoded_values['ytp'], cnames=encoded_values['cname'],
+            md=self.params['max_children_count'], nmin=self.params['min_samples_split'])     # unsupervised binning
         toc('UBNG finished successfully.')
         tic()
         sb = sbng(ub, md=self.params['max_children_count'])       # supervised binning
@@ -87,7 +111,9 @@ class Node:
 
     def get_best_split(self, binning_result, column_name):
         splits_by_different_col = list(filter(lambda variable: variable['cname'] != column_name, binning_result))
-        best_split_variable = filter(lambda variable: variable['st'][0][self.params['criterion']][0] == max(map(lambda var: var['st'][0][self.params['criterion']][0], splits_by_different_col)), splits_by_different_col)
+        best_split_variable = filter(
+            lambda variable: variable['st'][0][self.params['criterion']][0] == max(map(lambda var: var['st'][0][self.params['criterion']][0],
+            splits_by_different_col)), splits_by_different_col)
         return list(best_split_variable)
 
     def update_tree_structure(self, tree, id, parent_id, label):

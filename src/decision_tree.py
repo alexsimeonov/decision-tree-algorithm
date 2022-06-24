@@ -23,7 +23,9 @@ class DecisionTree:
         print('Decision tree starts growing.')
         encoded_values = self.encode_values(self.x, self.y, self.config)
         self.structure.create_node('Root', 'root')
-        self.root_node.split(encoded_values, self.statistics, self.statistics_per_node, self.config, tree=self.structure)
+        self.root_node.split(
+            encoded_values, self.statistics,
+            self.statistics_per_node, self.config, tree=self.structure)
         toc3('Decision tree growing phase successful in')
 
     def represent_structure(self):
