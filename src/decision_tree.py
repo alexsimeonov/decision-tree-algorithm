@@ -35,7 +35,8 @@ class DecisionTree:
 
     def report_statistics(self):
         print('Decision tree statistics:')
-        print(self.statistics)
+        print('Nodes count:', self.statistics['nodes_count'])
+        print('Leaf count:', self.statistics['leaf_count'])
         print('Detailed statistics per node:')
         print(pd.DataFrame(self.statistics_per_node))
 

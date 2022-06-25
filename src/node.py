@@ -16,7 +16,7 @@ class Status(Enum):
 class Node:
     def __init__(self, params, bin=None, parent_level=0):
         self.params = params
-        self.children = [] # Add children after split
+        self.children = []
         self.bin = bin
         self.status = Status.TERMINAL if self.bin else Status.ROOT
         self.binning_results = None
@@ -59,8 +59,10 @@ class Node:
             node_statistics.append(
                 {
                     'parent': parent_label,
-                    'split_variable_name': treelib_node_label,
-                    'number_of_children': len(self.children) if self.status != Status.LEAF else 0,
+                    'split_variable': treelib_node_label,
+                    'children': len(self.children) if self.status != Status.LEAF else 0,
+                    'records': self.bin['n'],
+                    'my': self.bin['my'],
                     'Gini': best_split[0]['st'][0]['Gini'][0],
                     'Chi2': best_split[0]['st'][0]['Chi2'][0]
                 })
@@ -95,17 +97,16 @@ class Node:
         return { 'x': current_x, 'y': current_y, 'w': current_w }
 
     def binning(self, encoded_values):
-        # 2. BINNING
         tic()
         y = encoded_values['y'].values
         ub = ubng(
             encoded_values['x'], encoded_values['xtp'],
             encoded_values['w'], y=y,
             ytp=encoded_values['ytp'], cnames=encoded_values['cname'],
-            md=self.params['max_children_count'], nmin=self.params['min_samples_split'])     # unsupervised binning
+            md=self.params['max_children_count'], nmin=self.params['min_samples_split'])
         toc('UBNG finished successfully.')
         tic()
-        sb = sbng(ub, md=self.params['max_children_count'])       # supervised binning
+        sb = sbng(ub, md=self.params['max_children_count'])
         toc('SBNG finished successfully.')
         return { 'ub': ub, 'sb': sb }
 
