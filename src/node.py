@@ -14,13 +14,14 @@ class Status(Enum):
     LEAF = 3
 
 class Node:
-    def __init__(self, params, bin=None, parent_level=0):
+    def __init__(self, params, bin=None, parent_level=0, parent_statistics=None):
         self.params = params
         self.children = []
         self.bin = bin
         self.status = Status.TERMINAL if self.bin else Status.ROOT
         self.binning_results = None
         self.level = parent_level + 1 if self.bin else parent_level
+        self.parent_statistics = parent_statistics
 
     def split(
         self, encoded_values,
@@ -32,18 +33,28 @@ class Node:
             self.bin, encoded_values['x'],
             encoded_values['y'], column_name)
         tree_statistics['nodes_count'] += 1
-        self.binning_results = self.binning(encoded_values)
+
+        # new configuration----
+        old_records_length = len(encoded_values['x'])
+        updated_encoded_values = copy.deepcopy(encoded_values)
+        updated_encoded_values.update({ 'x': self_data['x'], 'y': self_data['y'], 'w': self_data['w'] })
+        # ----
+
+        self.binning_results = self.binning(updated_encoded_values)
         best_split = self.get_best_split(self.binning_results['sb'], column_name)
         bins = filter_dictionary(
             best_split[0]['bns'],
             lambda bin: bin['type'] == 'Normal')
 
-        old_records_length = len(encoded_values['x'])
-        updated_encoded_values = copy.deepcopy(encoded_values)
-        updated_encoded_values.update({ 'x': self_data['x'], 'y': self_data['y'], 'w': self_data['w'] })
+        # old configuration
+        # old_records_length = len(encoded_values['x'])
+        # updated_encoded_values = copy.deepcopy(encoded_values)
+        # updated_encoded_values.update({ 'x': self_data['x'], 'y': self_data['y'], 'w': self_data['w'] })
+        # -----
 
         if (self.status == Status.ROOT or self.level == 1) or column_name != best_split[0]['cname']:
-            self.define_node_chidren(bins)
+            parent_statistics = { 'my1': best_split[0]['st'][0]['my1'][0][0], 'my0': best_split[0]['st'][0]['my0'][0][0] }
+            self.define_node_chidren(bins, parent_statistics)
         else:
             self.status = Status.LEAF
 
@@ -51,7 +62,7 @@ class Node:
             self.status = Status.LEAF
 
         treelib_node_id = uuid.uuid4()
-        treelib_node_label = 'Root' if self.status == Status.ROOT else self.compose_node_label(best_split[0]['cname'], index)
+        treelib_node_label = 'Root' if self.status == Status.ROOT else self.compose_node_label(column_name, index)
         self.update_tree_structure(tree, treelib_node_id, parent_id, treelib_node_label)
 
         # Adding statistics for current node into the tree table
@@ -62,7 +73,8 @@ class Node:
                     'split_variable': treelib_node_label,
                     'children': len(self.children) if self.status != Status.LEAF else 0,
                     'records': self.bin['n'],
-                    'my': self.bin['my'],
+                    'my0': self.parent_statistics['my0'],
+                    'my1': self.parent_statistics['my1'],
                     'Gini': best_split[0]['st'][0]['Gini'][0],
                     'Chi2': best_split[0]['st'][0]['Chi2'][0]
                 })
@@ -84,12 +96,11 @@ class Node:
         current_x = x
         current_y = y
 
-        if self.status != Status.ROOT:
-            if bin['type'] == 'Normal':
-                if len(bin['lb']) and not len(bin['rb']):
-                    current_x = x[(x[column_name].isin(bin['lb']))]
-                elif len(bin['lb']) == 1 | len(bin['rb']) == 1:
-                    current_x = x[x[column_name].between(float(bin['lb'][0]), float(bin['rb'][0]))]
+        if self.status != Status.ROOT and bin['type'] == 'Normal':
+            if len(bin['lb']) and not len(bin['rb']):
+                current_x = x[(x[column_name].isin(bin['lb']))]
+            elif len(bin['lb']) == 1 | len(bin['rb']) == 1:
+                current_x = x[x[column_name].between(float(bin['lb'][0]), float(bin['rb'][0]))]
 
         current_y = y[y.index.isin(list(current_x.index))]
         current_w = ones((len(current_x.index), 1))
@@ -126,11 +137,11 @@ class Node:
     def compose_node_label(self, column_name, index):
         return column_name + '_' + str(self.level) + '_' + str(index)
 
-    def define_node_chidren(self, bins):
+    def define_node_chidren(self, bins, parent_statistics):
         for (key, value) in bins.items():
             if value['n'] >= self.params['min_samples_split']:
-                child = self.compose_child(value)
+                child = self.compose_child(value, parent_statistics)
                 self.children.append(child)
 
-    def compose_child(self, bin):
-        return Node(self.params, bin, self.level)
+    def compose_child(self, bin, parent_statistics):
+        return Node(self.params, bin, self.level, parent_statistics=parent_statistics)
