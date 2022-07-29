@@ -34,23 +34,15 @@ class Node:
             encoded_values['y'], column_name)
         tree_statistics['nodes_count'] += 1
 
-        # new configuration----
         old_records_length = len(encoded_values['x'])
         updated_encoded_values = copy.deepcopy(encoded_values)
         updated_encoded_values.update({ 'x': self_data['x'], 'y': self_data['y'], 'w': self_data['w'] })
-        # ----
 
         self.binning_results = self.binning(updated_encoded_values)
         best_split = self.get_best_split(self.binning_results['sb'], column_name)
         bins = filter_dictionary(
             best_split[0]['bns'],
             lambda bin: bin['type'] == 'Normal')
-
-        # old configuration
-        # old_records_length = len(encoded_values['x'])
-        # updated_encoded_values = copy.deepcopy(encoded_values)
-        # updated_encoded_values.update({ 'x': self_data['x'], 'y': self_data['y'], 'w': self_data['w'] })
-        # -----
 
         if (self.status == Status.ROOT or self.level == 1) or column_name != best_split[0]['cname']:
             parent_statistics = { 'my1': best_split[0]['st'][0]['my1'][0][0], 'my0': best_split[0]['st'][0]['my0'][0][0] }

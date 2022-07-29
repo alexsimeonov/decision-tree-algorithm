@@ -11,7 +11,6 @@ class DecisionTree:
         self.x = x
         self.y = y
         self.config = config
-        # Initialize the root node, using the data passed to the DT
         self.root_node = Node(self.hyperparams)
         self.dictionary_structure = self.root_node
         self.structure = Tree()

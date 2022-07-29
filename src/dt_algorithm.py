@@ -22,7 +22,6 @@ criterion = input('Enter desired criterion for the Binning algorithm ("Gini" or 
 if criterion not in criterion_options:
     raise Exception('Value for criterion should be either "Gini" or "Chi2".')
 
-
 print('The Criterion used by the binning algorithm is:', criterion)
 initial_dataset_samples_count = int(input('Enter the number of samples from the dataset you want to use for the algorithm: '))
 max_depth = int(input('Enter desired max depth of decision tree: '))
